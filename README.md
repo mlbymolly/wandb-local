@@ -46,26 +46,7 @@ wandb sweep sweep.yaml
 wandb agent <sweep-id>
 ```
 
-## Running on GCP
-
-### Vertex AI
-
-Wrap `tutorial.py` in a Vertex AI custom training job. W&B runs from Vertex AI the same way as locally — set the `WANDB_API_KEY` environment variable as a secret and pass it through:
-
-```bash
-gcloud ai custom-jobs create \
-  --region=us-central1 \
-  --display-name=wandb-poc \
-  --worker-pool-spec=machine-type=n1-standard-4,replica-count=1,\
-container-image-uri=gcr.io/deeplearning-platform-release/tf2-gpu.2-13,\
-  --environment-variables=WANDB_API_KEY=$WANDB_API_KEY
-```
-
-### Compute Engine / Cloud Run
-
-Set `WANDB_API_KEY` as an environment variable or Secret Manager secret. No other GCP-specific configuration is needed — W&B communicates outbound over HTTPS.
-
-### Ray
+## Running on GCP with Ray on GKE
 
 W&B works inside Ray remote functions and actors — each worker calls `wandb.init()` independently. Use the `group` parameter to tie all workers from a single job together in the W&B UI.
 
@@ -139,12 +120,12 @@ Or set it in a `runtime_env` dict when calling `ray.init()`:
 ray.init(runtime_env={"env_vars": {"WANDB_API_KEY": os.environ["WANDB_API_KEY"]}})
 ```
 
-#### Running Ray jobs on GCP
+#### Running Ray on GKE
 
-For Ray clusters on GCP (KubeRay on GKE, or Ray on Vertex AI), store the API key in Secret Manager and inject it as an environment variable into your worker pod spec or job config — same pattern as the Vertex AI section above.
+For KubeRay on GKE, store the API key in Secret Manager and inject it as an environment variable into your worker pod spec.
 
 ## Resources
 
 - [W&B Docs](https://docs.wandb.ai)
 - [W&B + GCP Integration Guide](https://docs.wandb.ai/guides/integrations/gcp)
-- [Vertex AI Custom Training](https://cloud.google.com/vertex-ai/docs/training/overview)
+- [KubeRay on GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/ray-on-gke/concepts/overview)
