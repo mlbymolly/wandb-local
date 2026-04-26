@@ -64,6 +64,84 @@ container-image-uri=gcr.io/deeplearning-platform-release/tf2-gpu.2-13,\
 
 Set `WANDB_API_KEY` as an environment variable or Secret Manager secret. No other GCP-specific configuration is needed — W&B communicates outbound over HTTPS.
 
+### Ray
+
+W&B works inside Ray remote functions and actors — each worker calls `wandb.init()` independently. Use the `group` parameter to tie all workers from a single job together in the W&B UI.
+
+#### Install
+
+```bash
+pip install wandb ray
+```
+
+#### Ray Core (remote functions)
+
+```python
+import ray
+import wandb
+
+@ray.remote
+def train_worker(config, group_id):
+    run = wandb.init(
+        project="my-project",
+        group=group_id,       # groups all workers from this job
+        job_type="train",
+        config=config,
+    )
+    # ... training logic ...
+    wandb.log({"loss": 0.42, "accuracy": 0.95})
+    run.finish()
+
+ray.init()
+group_id = wandb.util.generate_id()  # shared across all workers
+futures = [train_worker.remote({"lr": 0.01}, group_id) for _ in range(4)]
+ray.get(futures)
+```
+
+#### Ray Tune
+
+Ray Tune has a built-in W&B callback that handles `wandb.init()` and metric logging automatically:
+
+```python
+from ray import tune
+from ray.air.integrations.wandb import WandbLoggerCallback
+
+def trainable(config):
+    for epoch in range(config["epochs"]):
+        loss = train_one_epoch(config)
+        tune.report(loss=loss)
+
+tuner = tune.Tuner(
+    trainable,
+    param_space={"lr": tune.grid_search([0.001, 0.01]), "epochs": 10},
+    run_config=tune.RunConfig(
+        callbacks=[WandbLoggerCallback(project="my-project")]
+    ),
+)
+tuner.fit()
+```
+
+#### Authentication
+
+Each Ray worker needs `WANDB_API_KEY` in its environment. Pass it when submitting the job:
+
+```bash
+# Ray job submission
+ray job submit --working-dir . \
+  --runtime-env-json '{"env_vars": {"WANDB_API_KEY": "'$WANDB_API_KEY'"}}' \
+  -- python train.py
+```
+
+Or set it in a `runtime_env` dict when calling `ray.init()`:
+
+```python
+ray.init(runtime_env={"env_vars": {"WANDB_API_KEY": os.environ["WANDB_API_KEY"]}})
+```
+
+#### Running Ray jobs on GCP
+
+For Ray clusters on GCP (KubeRay on GKE, or Ray on Vertex AI), store the API key in Secret Manager and inject it as an environment variable into your worker pod spec or job config — same pattern as the Vertex AI section above.
+
 ## Resources
 
 - [W&B Docs](https://docs.wandb.ai)
