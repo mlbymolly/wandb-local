@@ -2,3 +2,4 @@ wandb>=0.17
 numpy
 scikit-learn
 joblib
+torch>=2.0

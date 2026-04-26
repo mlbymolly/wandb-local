@@ -6,8 +6,9 @@ A proof-of-concept demonstrating [Weights & Biases](https://wandb.ai) for ML exp
 
 | Path | Description |
 |------|-------------|
-| `example/` | Runnable Keras CNN script with W&B integration |
-| `Effective_MLOps_W&B.ipynb` | End-to-end MLOps notebook with PyTorch + W&B (experiment tracking, artifacts, sweeps) |
+| `example/tutorial.py` | Scikit-learn MLP trained on Fashion-MNIST with W&B experiment tracking, artifacts, and sweeps |
+| `example/distributed_training.py` | PyTorch DDP training showing how to organize W&B logs across multiple workers |
+| `mlops_wandb.ipynb` | End-to-end MLOps notebook with PyTorch + W&B (experiment tracking, artifacts, sweeps) |
 
 ## Key W&B Features Demonstrated
 
