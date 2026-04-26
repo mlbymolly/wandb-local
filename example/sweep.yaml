@@ -1,0 +1,22 @@
+program: tutorial.py
+method: bayes
+metric:
+  goal: maximize
+  name: val_accuracy
+parameters:
+  layer_1_size:
+    values: [16, 32]
+  layer_2_size:
+    values: [32, 64]
+  hidden_layer_size:
+    values: [64, 128, 256]
+  learn_rate:
+    distribution: log_uniform_values
+    min: 0.001
+    max: 0.1
+  momentum:
+    values: [0.8, 0.9, 0.95]
+  epochs:
+    value: 8
+  batch_size:
+    values: [32, 64]

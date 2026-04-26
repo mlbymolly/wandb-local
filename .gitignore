@@ -1,0 +1,33 @@
+# Weights & Biases local run data
+wandb/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# Model artifacts
+*.h5
+*.pt
+*.pth
+*.pkl
+*.ckpt
+
+# Generated images from training
+Training.png
+confusion_matrix.png
+
+# Data downloads
+MNIST/
